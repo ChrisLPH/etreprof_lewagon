@@ -316,13 +316,13 @@ def update_anciennete(row):
     except:
         return anciennete
 
-def main_users_cleaning(url):
+def main_users_cleaning(csv):
     """
-    Cleans the user data from the given URL.
+    Cleans the user data from the given csv file.
     """
 
     # Drop unnecessary columns and filter data
-    df = pd.read_csv(url, low_memory=False)
+    df = pd.read_csv(csv, low_memory=False)
     df = df[df.locale != "be"]
     df['pays'] = df['pays'].fillna('france')
     df = df[df.pays == 'france']
