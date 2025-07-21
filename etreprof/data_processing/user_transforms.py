@@ -72,7 +72,6 @@ def replace_categories(niveaux_str):
     except:
         return niveaux_str
 
-
 all_niveaux = ['1ère',
  '2nde',
  '3e',
@@ -161,7 +160,6 @@ def extract_departement(code_postal):
 
     # Cas général (2 chiffres) - garder le zéro initial
     return cp[:2]
-
 
 dept_to_academie = {
     # Clermont-Ferrand
@@ -291,7 +289,6 @@ def extract_discipline(row):
 
     return np.nan
 
-
 def update_anciennete(row):
     anciennete = row['anciennete']
     created_at = row['created_at']
@@ -316,13 +313,12 @@ def update_anciennete(row):
     except:
         return anciennete
 
-def main_users_cleaning(csv):
+def main_users_cleaning(df):
     """
     Cleans the user data from the given csv file.
     """
 
     # Drop unnecessary columns and filter data
-    df = pd.read_csv(csv, low_memory=False)
     df = df[df.locale != "be"]
     df['pays'] = df['pays'].fillna('france')
     df = df[df.pays == 'france']

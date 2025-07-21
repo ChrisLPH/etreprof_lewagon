@@ -5,32 +5,29 @@ import time
 from datetime import datetime
 from tqdm import tqdm
 
-def main_contents_usage(csv_contents, csv_interactions, csv_users):
+def main_contents_usage(df_contents, df_interactions, df_users):
     """
     Main function to process user contents usage data from interactions and user CSV files.
 
     Parameters
     ----------
-    csv_interactions : str
-        Path to the CSV file containing user interactions.
-    csv_users : str
-        Path to the CSV file containing user data.
+    df_contents : pandas.DataFrame
+        DataFrame containing content data.
+    df_interactions : pandas.DataFrame
+        DataFrame containing user interactions.
+    df_users : pandas.DataFrame
+        DataFrame containing user data.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame with enriched user data including content usage statistics.
     """
-    # Load the user contents CSV file into a DataFrame
-    df_contents = pd.read_csv(csv_contents, low_memory = False)
 
     df_contents_lite = df_contents[['id', 'type', 'transition_ecologique', 'sante_mentale', 'ecole_inclusive', 'cps',
        'reussite_tous_eleves']]
 
     df_contents_lite['master_theme'] = None
-
-    # Import `interactions` to map contents with users
-    df_interactions = pd.read_csv(csv_interactions, low_memory=False)
 
     df_interactions_filtered = df_interactions[df_interactions.content_type.isin(['contenu', 'guide-pratique', 'fiche-outils'])]
 
@@ -141,7 +138,7 @@ def main_contents_usage(csv_contents, csv_interactions, csv_users):
                             how='outer'
                         ).fillna(0)
 
-    df_user_final = pd.read_csv(csv_users, low_memory=False)
+    df_user_final = df_users
 
     df_users_featured = df_users_featured.rename(columns={'user_id': 'id'})
 

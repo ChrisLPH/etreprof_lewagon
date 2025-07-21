@@ -156,18 +156,14 @@ def create_temporal_engagement_df_optimized(df_interactions):
     return df_engagement
 
 
-def main_frequency_users(csv_interactions, csv_users):
+def main_frequency_users(df_interactions, df_users):
     """
     Main function to process user frequency data from interactions and user CSV files.
     """
-    # Load the user CSV file into a DataFrame
-    df_interactions = pd.read_csv(csv_interactions, low_memory=False)
-
     # Create the temporal engagement DataFrame
     df_engagement = create_temporal_engagement_df_optimized(df_interactions)
 
     # Merge the engagement DataFrame with the user DataFrame
-    df_users = pd.read_csv(csv_users, low_memory=False)
     df_users_enriched = df_users.merge(df_engagement, on='id', how='left')
 
     return df_users_enriched
