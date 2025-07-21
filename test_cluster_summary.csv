@@ -1,0 +1,9 @@
+cluster_id,nom,taille,pourcentage,niveau_engagement,anciennete_moyenne,themes_preferes
+0,Les Innovateurs Numériques,19,9.5,Moyen,23.8,"Orientation scolaire, Gestion de classe..."
+1,Les Pédagogues Traditionnels,34,17.0,Élevé,8.5,"Éducation inclusive, Gestion de classe..."
+2,Les Spécialistes Inclusifs,21,10.5,Élevé,6.6,"Bien-être enseignant, Évaluation des apprentissages..."
+3,Les Gestionnaires Pragmatiques,27,13.5,Moyen,19.1,"Relations parents-école, Éducation inclusive..."
+4,Les Experts Évaluation,20,10.0,Faible,15.4,"Bien-être enseignant, Éducation inclusive..."
+5,Les Mentors Bienveillants,20,10.0,Faible,19.0,"Éducation inclusive, Gestion de classe..."
+6,Les Novices Motivés,32,16.0,Faible,15.5,"Pédagogie différenciée, Relations parents-école..."
+7,Les Vétérans Expérimentés,27,13.5,Élevé,16.2,"Gestion de classe, Relations parents-école..."

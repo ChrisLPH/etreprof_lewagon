@@ -7,3 +7,7 @@ matplotlib
 seaborn
 json
 re
+tqdm
+fastapi
+uvicorn
+streamlit

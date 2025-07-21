@@ -1,0 +1,6 @@
+content_id,theme_principal,theme_confidence,defi_prioritaire,defi_confidence,word_count
+100,Pédagogie différenciée,0.433,ecole_inclusive,0.557,17
+101,Numérique éducatif,0.321,aucun,0.409,14
+102,Bien-être enseignant,0.33,sante_mentale,0.627,14
+103,Évaluation des apprentissages,0.535,competences_psychosociales,0.538,12
+104,Pédagogie différenciée,0.421,ecole_inclusive,0.437,12
