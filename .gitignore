@@ -6,5 +6,5 @@ notebooks/.ipynb_checkpoints/
 __pycache__/
 *.pyc
 *.pyo
-
-*.tests_chris
+*.pyd
+.Python
