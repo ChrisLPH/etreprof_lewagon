@@ -6,10 +6,16 @@ import os
 from dotenv import load_dotenv
 
 # Import databases
-load_dotenv()
-df_users = pd.read_csv(os.getenv("USER_URL_DB"), low_memory=False)
-df_contents = pd.read_csv(os.getenv("CONTENTS_URL_DB"), low_memory=False)
-df_interactions = pd.read_csv(os.getenv("INTERACTIONS_URL_DB"), low_memory=False)
+# load_dotenv()
+# df_users = pd.read_csv(os.getenv("USER_URL_DB"), low_memory=False)
+# df_contents = pd.read_csv(os.getenv("CONTENTS_URL_DB"), low_memory=False)
+# df_interactions = pd.read_csv(os.getenv("INTERACTIONS_URL_DB"), low_memory=False)
+
+# local paths for testing
+df_users = pd.read_csv("raw_data/users.csv", low_memory=False)
+df_contents = pd.read_csv("raw_data/contents_v3.csv", low_memory=False)
+df_interactions = pd.read_csv("raw_data/interaction_events.csv", low_memory=False)
+
 
 def main_process_users(df_users, df_contents, df_interactions):
     """
@@ -43,4 +49,4 @@ def main_process_users(df_users, df_contents, df_interactions):
 
 if __name__ == "__main__":
     df_final = main_process_users(df_users, df_contents, df_interactions)
-    df_final.to_csv("../../data/users_final_dataset.csv", index=False)
+    df_final.to_csv("data/users_final_dataset.csv", index=False)
