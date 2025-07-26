@@ -40,10 +40,10 @@ def get_cluster_info():
     _, _, profiles = load_clustering_models()
 
     return {
-        0: {"name": "Utilisateurs Équilibrés", "profile": profiles.loc[0].to_dict()},
-        1: {"name": "Spécialistes Email", "profile": profiles.loc[1].to_dict()},
-        2: {"name": "Super Utilisateurs", "profile": profiles.loc[2].to_dict()},
-        3: {"name": "Inactifs", "profile": profiles.loc[3].to_dict()}
+        0: {"name": "Balanced Users", "profile": profiles.loc[0].to_dict()},
+        1: {"name": "Email Specialists", "profile": profiles.loc[1].to_dict()},
+        2: {"name": "Super Users", "profile": profiles.loc[2].to_dict()},
+        3: {"name": "Inactive Users", "profile": profiles.loc[3].to_dict()}
     }
 
 # Update clustering of users
@@ -61,6 +61,49 @@ def predict_user_clusters(df_users):
     clusters = kmeans.predict(X_scaled)
 
     return clusters
+
+def get_user_profile(user_id: int):
+    assignments_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/user_cluster_assignments.csv')
+    df_assignments = pd.read_csv(assignments_path)
+
+    user_data = df_assignments[df_assignments['id'] == user_id]
+
+    if user_data.empty:
+        return {"error": f"User {user_id} not found"}
+
+    user_row = user_data.iloc[0]
+    cluster_id = int(user_row['cluster'])
+
+    cluster_info = get_cluster_info()[cluster_id]
+
+    recommendations = get_recommendations_for_cluster(cluster_id)
+
+    niveaux = []
+    if user_row.get('maternelle', 0) == 1:
+        niveaux.append('maternelle')
+    if user_row.get('elementaire', 0) == 1:
+        niveaux.append('elementaire')
+    if user_row.get('college', 0) == 1:
+        niveaux.append('college')
+    if user_row.get('lycee', 0) == 1:
+        niveaux.append('lycee')
+    if user_row.get('lycee_pro', 0) == 1:
+        niveaux.append('lycee_pro')
+
+    return {
+        "user_id": user_id,
+        "profile": {
+            "anciennete": int(user_row.get('anciennete', 0)) if pd.notna(user_row.get('anciennete')) else None,
+            "degre": int(user_row.get('degre', 0)) if pd.notna(user_row.get('degre')) else None,
+            "academie": user_row.get('academie') if pd.notna(user_row.get('academie')) else "Non renseignée",
+            "niveaux_enseignes": niveaux
+        },
+        "cluster": {
+            "id": cluster_id,
+            "name": cluster_info["name"]
+        },
+        "recommendations": recommendations
+    }
 
 # Recommendations based on clusters
 def get_recommendations_for_cluster(cluster_id: int):

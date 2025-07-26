@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from etreprof.ml_package.models import classify_content, get_cluster_info, predict_user_clusters, get_recommendations_for_cluster
+from etreprof.ml_package.models import classify_content, get_cluster_info, predict_user_clusters, get_recommendations_for_cluster, get_user_profile
 from etreprof.data_processing.user_full_processing import main_process_users
 
 
@@ -51,6 +51,20 @@ def recompute_clusters():
         "processing_time": "calculated in real-time"
     }
 
+@app.get("/user/{user_id}/profile")
+def get_user_profile_endpoint(user_id: int):
+    profile_data = get_user_profile(user_id)
+
+    if "error" in profile_data:
+        return {
+            "success": False,
+            "error": profile_data["error"]
+        }
+
+    return {
+        "success": True,
+        "data": profile_data
+    }
 
 @app.get("/recommend/{cluster_id}")
 def get_recommendations(cluster_id: int):

@@ -1,12 +1,9 @@
-dotenv
+python-dotenv
 pandas
 numpy
 scikit-learn
 matplotlib
 seaborn
-json
-re
 tqdm
 fastapi
 uvicorn
-streamlit
