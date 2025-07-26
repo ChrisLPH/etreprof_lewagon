@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: etreprof-ml
+Version: 0.1.0
+Requires-Dist: python-dotenv
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: tqdm
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Dynamic: requires-dist

@@ -3,3 +3,8 @@ data/*.csv
 notebooks/.ipynb_checkpoints/
 .ipynb_checkpoints/
 .env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
