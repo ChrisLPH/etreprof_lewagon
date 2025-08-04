@@ -2,27 +2,72 @@ import os
 import pickle
 import pandas as pd
 from typing import Dict
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
+import json
+import numpy as np
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Content classification function
+# Old version commented out for reference - Mockup before real models were implemented
+# def classify_content(content: str) -> Dict:
+#     theme_path = os.path.join(ROOT_PATH, 'pickles/theme_model.pkl')
+#     with open(theme_path, 'rb') as f:
+#         theme_model = pickle.load(f)
+
+#     defi_path = os.path.join(ROOT_PATH, 'pickles/defi_model.pkl')
+#     with open(defi_path, 'rb') as f:
+#         defi_model = pickle.load(f)
+
+#     theme_pred = theme_model.predict([content])[0]
+#     defi_pred = defi_model.predict([content])[0]
+
+#     return {
+#         "theme": theme_pred,
+#         "defi": defi_pred
+#     }
+
 def classify_content(content: str) -> Dict:
-    theme_path = os.path.join(ROOT_PATH, 'pickles/theme_model.pkl')
-    with open(theme_path, 'rb') as f:
-        theme_model = pickle.load(f)
+    """
+    Classify content using BERTopic model trained by Guillaume
+    Returns top 3 topics with confidence scores.
+    """
+    bertopic_path = os.path.join(ROOT_PATH, 'pickles/bertopic')
+    topics_json_path = os.path.join(bertopic_path, 'topics.json')
 
-    defi_path = os.path.join(ROOT_PATH, 'pickles/defi_model.pkl')
-    with open(defi_path, 'rb') as f:
-        defi_model = pickle.load(f)
+    # Load topics.json to get topic labels
+    with open(topics_json_path, 'r', encoding='utf-8') as f:
+        topics_data = json.load(f)
 
-    theme_pred = theme_model.predict([content])[0]
-    defi_pred = defi_model.predict([content])[0]
+    topic_labels = topics_data['topic_labels']
+
+    # Load the model
+    embedding_model = SentenceTransformer('intfloat/multilingual-e5-large-instruct')
+    topic_model = BERTopic.load(bertopic_path, embedding_model=embedding_model)
+
+    # Prediction
+    topics, scores = topic_model.transform([content])
+    topic_id = topics[0]
+    confidence = scores[0] if len(scores) > 0 else 0.0
+
+    # Topic principal (le seul assigné par BERTopic)
+    main_topic_id = topics[0]
+    main_confidence = float(scores[0][main_topic_id])  # Similarité du topic assigné
+
+    # Label du topic principal
+    main_topic_label = topic_labels.get(str(main_topic_id), f"Topic {main_topic_id}")
+    if "_" in main_topic_label:
+        main_topic_label = main_topic_label.split("_", 1)[1]
+
 
     return {
-        "theme": theme_pred,
-        "defi": defi_pred
+        "topic_principal": {
+            "id": int(main_topic_id),
+            "label": main_topic_label,
+            "confidence": round(main_confidence * 100, 1)
+        }
     }
-
 
 # User clustering functions
 def load_clustering_models():
