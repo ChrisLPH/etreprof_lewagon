@@ -68,11 +68,11 @@ def get_user_profile_endpoint(user_id: int):
 
 @app.get("/recommend/{cluster_id}")
 def get_recommendations(cluster_id: int):
-    if cluster_id not in [0, 1, 2, 3]:
+    if cluster_id not in [0, 1, 2, 3, 4]:
         return {
             "success": False,
-            "error": "Cluster ID must be 0, 1, 2, or 3",
-            "available_clusters": [0, 1, 2, 3]
+            "error": "Cluster ID must be 0, 1, 2, 3, or 4",
+            "available_clusters": [0, 1, 2, 3, 4]
         }
 
     recommendations = get_recommendations_for_cluster(cluster_id)

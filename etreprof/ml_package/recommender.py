@@ -17,7 +17,7 @@ def load_recommendation_data():
     """
     # Load user data with clusters and topics
     users_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/users_final_with_clusters.csv')
-    df_users = pd.read_csv(users_path, low_memory=False)
+    df_users = pd.read_csv(users_path)
 
     # Load content data
     # Note: Assuming we have access to the processed contents with topics
@@ -274,10 +274,10 @@ def generate_recommendations_for_cluster(cluster_id: int, num_recommendations: i
             for _, article in articles.iterrows():
                 content_info = {
                     'id': int(article['id']) if pd.notna(article['id']) else None,
-                    'title': article.get('title', 'Article sans titre'),
-                    'type': article.get('type', 'article'),
+                    'title': str(article.get('title', 'Article sans titre')),
+                    'type': str(article.get('type', 'article')),
                     'topic_match': True,
-                    'url': article.get('url', ''),
+                    'url': str(article.get('url', '')),
                     'is_priority_challenge': False,
                     'reason': f"Populaire dans votre cluster (Topic {article.get('reduced topics', 'N/A')})"
                 }
@@ -292,10 +292,10 @@ def generate_recommendations_for_cluster(cluster_id: int, num_recommendations: i
             for _, fiche in fiches.iterrows():
                 content_info = {
                     'id': int(fiche['id']) if pd.notna(fiche['id']) else None,
-                    'title': fiche.get('title', 'Fiche outil sans titre'),
-                    'type': fiche.get('type', 'fiche-outils'),
+                    'title': str(fiche.get('title', 'Fiche outil sans titre')),
+                    'type': str(fiche.get('type', 'fiche-outils')),
                     'topic_match': True,
-                    'url': fiche.get('url', ''),
+                    'url': str(fiche.get('url', '')),
                     'is_priority_challenge': False,
                     'reason': f"Outil pratique populaire (Topic {fiche.get('reduced topics', 'N/A')})"
                 }
@@ -306,6 +306,12 @@ def generate_recommendations_for_cluster(cluster_id: int, num_recommendations: i
         # Add 1 priority challenge content
         challenge_content = get_priority_challenge_content(df_contents, exclude_ids=selected_content_ids)
         if challenge_content:
+            # Ensure all values are JSON serializable
+            challenge_content['id'] = int(challenge_content['id']) if challenge_content.get('id') and pd.notna(challenge_content['id']) else None
+            challenge_content['title'] = str(challenge_content.get('title', ''))
+            challenge_content['type'] = str(challenge_content.get('type', ''))
+            challenge_content['url'] = str(challenge_content.get('url', ''))
+            challenge_content['challenge_type'] = str(challenge_content.get('challenge_type', ''))
             challenge_content['reason'] = f"Développement professionnel - {challenge_content.get('challenge_type', 'Défi prioritaire')}"
             recommendations["recommendations"].append(challenge_content)
 
@@ -326,6 +332,26 @@ def generate_recommendations_for_cluster(cluster_id: int, num_recommendations: i
     except Exception as e:
         recommendations["error"] = f"Erreur lors de la génération des recommandations: {str(e)}"
         recommendations["recommendations"] = []
+
+    # Convert numpy types to native Python types for JSON serialization
+    def clean_for_json(obj):
+        if isinstance(obj, (np.integer, np.int64)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64)):
+            return float(obj) if not np.isnan(obj) else None
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif pd.isna(obj):
+            return None
+        return obj
+
+    # Clean all data for JSON serialization
+    recommendations["cluster_id"] = int(recommendations["cluster_id"])
+    recommendations["total_recommendations"] = int(recommendations["total_recommendations"])
+
+    # Clean reasoning data
+    if "reasoning" in recommendations:
+        recommendations["reasoning"]["top_topics"] = [int(t) if pd.notna(t) else None for t in recommendations["reasoning"]["top_topics"]]
 
     return recommendations
 
