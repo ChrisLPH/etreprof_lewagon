@@ -1,0 +1,95 @@
+{
+  "0": {
+    "nom": "Peu Engagés Primaire",
+    "taille": "74,099 utilisateurs (37.3%)",
+    "anciennete_moyenne": "14 ans",
+    "activite_generale": "Faible",
+    "engagement_email": "Faible",
+    "usage_contenu": "Très faible",
+    "diversite_thematique": "Aucune diversité",
+    "activite_recente": "Aucune",
+    "activite_passee": "Aucune",
+    "consistance_annuelle": "Sporadique",
+    "niveau_principal": "Élémentaire (65%)",
+    "repartition_niveaux": {
+      "Maternelle": "41%",
+      "Élémentaire": "65%"
+    }
+  },
+  "1": {
+    "nom": "Actifs Polyvalents",
+    "taille": "26,411 utilisateurs (13.3%)",
+    "anciennete_moyenne": "15 ans",
+    "activite_generale": "Modéré",
+    "engagement_email": "Modéré",
+    "usage_contenu": "Modéré",
+    "diversite_thematique": "Moyennement diversifié",
+    "activite_recente": "Légère",
+    "activite_passee": "Légère",
+    "consistance_annuelle": "Très actif",
+    "niveau_principal": "Élémentaire (36%)",
+    "repartition_niveaux": {
+      "Maternelle": "29%",
+      "Élémentaire": "36%",
+      "Collège": "26%",
+      "Lycée": "12%"
+    }
+  },
+  "2": {
+    "nom": "Super Users",
+    "taille": "7,913 utilisateurs (4.0%)",
+    "anciennete_moyenne": "16 ans",
+    "activite_generale": "Très fort",
+    "engagement_email": "Modéré",
+    "usage_contenu": "Très fort",
+    "diversite_thematique": "Très diversifié",
+    "activite_recente": "Légère",
+    "activite_passee": "Légère",
+    "consistance_annuelle": "Très actif",
+    "niveau_principal": "Élémentaire (33%)",
+    "repartition_niveaux": {
+      "Maternelle": "26%",
+      "Élémentaire": "33%",
+      "Collège": "29%",
+      "Lycée": "14%",
+      "Lycée Pro": "12%"
+    }
+  },
+  "3": {
+    "nom": "Email-Heavy",
+    "taille": "42,611 utilisateurs (21.4%)",
+    "anciennete_moyenne": "14 ans",
+    "activite_generale": "Fort",
+    "engagement_email": "Modéré",
+    "usage_contenu": "Très faible",
+    "diversite_thematique": "Aucune diversité",
+    "activite_recente": "Forte",
+    "activite_passee": "Forte",
+    "consistance_annuelle": "Très actif",
+    "niveau_principal": "Élémentaire (40%)",
+    "repartition_niveaux": {
+      "Maternelle": "27%",
+      "Élémentaire": "40%",
+      "Collège": "22%",
+      "Lycée": "11%"
+    }
+  },
+  "4": {
+    "nom": "Peu Engagés Secondaire",
+    "taille": "47,861 utilisateurs (24.1%)",
+    "anciennete_moyenne": "15 ans",
+    "activite_generale": "Faible",
+    "engagement_email": "Faible",
+    "usage_contenu": "Très faible",
+    "diversite_thematique": "Aucune diversité",
+    "activite_recente": "Aucune",
+    "activite_passee": "Aucune",
+    "consistance_annuelle": "Sporadique",
+    "niveau_principal": "Collège (58%)",
+    "repartition_niveaux": {
+      "Collège": "58%",
+      "Lycée": "26%",
+      "Lycée Pro": "17%"
+    }
+  }
+}
