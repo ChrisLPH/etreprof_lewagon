@@ -73,36 +73,84 @@ def classify_content(content: str) -> Dict:
 def load_clustering_models():
     kmeans_path = os.path.join(ROOT_PATH, 'pickles/kmeans_model.pkl')
     scaler_path = os.path.join(ROOT_PATH, 'pickles/scaler_model.pkl')
+    metadata_path = os.path.join(ROOT_PATH, 'pickles/metadata.json')
     profiles_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/cluster_profiles.csv')
+    personas_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/cluster_personas_lisibles.json')
 
-    kmeans = pickle.load(open(kmeans_path, 'rb'))
-    scaler = pickle.load(open(scaler_path, 'rb'))
+
+    # kmeans = pickle.load(open(kmeans_path, 'rb'))
+    # scaler = pickle.load(open(scaler_path, 'rb'))
+    # metadata = json.load(metadata_path, 'r')
+    # profiles = pd.read_csv(profiles_path, index_col=0)
+    # personas = json.load(personas_path, 'r', encoding='utf-8')
+    # Load models
+    with open(kmeans_path, 'rb') as f:
+        kmeans = pickle.load(f)
+
+    with open(scaler_path, 'rb') as f:
+        scaler = pickle.load(f)
+
+    # Load metadata
+    with open(metadata_path, 'r') as f:
+        metadata = json.load(f)
+
+    # Load cluster profiles (statistical data)
     profiles = pd.read_csv(profiles_path, index_col=0)
 
-    return kmeans, scaler, profiles
+    # Load personas (business-friendly descriptions)
+    with open(personas_path, 'r', encoding='utf-8') as f:
+        personas = json.load(f)
+
+    return kmeans, scaler, metadata, profiles, personas
 
 def get_cluster_info():
-    _, _, profiles = load_clustering_models()
+    """Get information about all 5 clusters with real data"""
+    _, _, metadata, profiles, personas = load_clustering_models()
 
-    return {
-        0: {"name": "Balanced Users", "profile": profiles.loc[0].to_dict()},
-        1: {"name": "Email Specialists", "profile": profiles.loc[1].to_dict()},
-        2: {"name": "Super Users", "profile": profiles.loc[2].to_dict()},
-        3: {"name": "Inactive Users", "profile": profiles.loc[3].to_dict()}
-    }
+    # Combine statistical profiles with business personas
+    cluster_info = {}
+
+    for cluster_id in range(5):  # 5 clusters: 0, 1, 2, 3, 4
+        cluster_info[cluster_id] = {
+            "name": personas[str(cluster_id)]["nom"],
+            "count": int(personas[str(cluster_id)]["taille"].split()[0].replace(",", "")),
+            "percentage": float(personas[str(cluster_id)]["taille"].split("(")[1].replace("%)", "")),
+            "description": {
+                "anciennete_moyenne": personas[str(cluster_id)]["anciennete_moyenne"],
+                "activite_generale": personas[str(cluster_id)]["activite_generale"],
+                "engagement_email": personas[str(cluster_id)]["engagement_email"],
+                "usage_contenu": personas[str(cluster_id)]["usage_contenu"],
+                "diversite_thematique": personas[str(cluster_id)]["diversite_thematique"],
+                "niveau_principal": personas[str(cluster_id)]["niveau_principal"],
+                "repartition_niveaux": personas[str(cluster_id)]["repartition_niveaux"]
+            },
+            "profile": profiles.loc[cluster_id].to_dict() if cluster_id in profiles.index else {}
+        }
+
+    return cluster_info
 
 # Update clustering of users
 def predict_user_clusters(df_users):
-    kmeans, scaler, _ = load_clustering_models()
+    kmeans, scaler, metadata, _, _ = load_clustering_models()
 
-    behavior_cols = [
-        'nb_fiche_outils', 'nb_guide_pratique', 'nb_transition_ecologique',
-        'nb_sante_mentale', 'nb_ecole_inclusive', 'nb_cps', 'nb_reussite_tous_eleves',
-        'total_interactions_x', 'diversite_contenus', 'nb_vote', 'nb_comments',
-        'nb_opened_mail', 'nb_clicked_mail'
-    ]
+    # Get the features used for clustering from metadata
+    features_used = metadata['features_used']
 
-    X_scaled = scaler.transform(df_users[behavior_cols])
+    # Verify that required features are present
+    missing_features = [f for f in features_used if f not in df_users.columns]
+    if missing_features:
+        raise ValueError(f"Missing required features for clustering: {missing_features}")
+
+    # Extract features in the correct order
+    X = df_users[features_used].copy()
+
+    # Handle any missing values
+    X = X.fillna(0)
+
+    # Apply the same preprocessing as during training
+    X_scaled = scaler.transform(X)
+
+    # Predict clusters
     clusters = kmeans.predict(X_scaled)
 
     return clusters
@@ -145,7 +193,8 @@ def get_user_profile(user_id: int):
         },
         "cluster": {
             "id": cluster_id,
-            "name": cluster_info["name"]
+            "name": cluster_info["name"],
+            "description": cluster_info["description"]
         },
         "recommendations": recommendations
     }
@@ -153,46 +202,109 @@ def get_user_profile(user_id: int):
 # Recommendations based on clusters
 def get_recommendations_for_cluster(cluster_id: int):
     """
-    Get recommendation strategy for a specific cluster based on behavioral patterns.
-    Content suggestions will be enhanced once clustering is updated with thematic preferences.
+    Get recommendation strategy for each of the 5 real clusters
+    Based on the business personas and behavioral patterns identified
     """
 
+    if cluster_id not in range(5):
+        return {
+            "error": "Invalid cluster ID",
+            "available_clusters": [0, 1, 2, 3, 4]
+        }
+
+    # Load personas for detailed recommendations
+    _, _, _, _, personas = load_clustering_models()
+    persona = personas[str(cluster_id)]
+
     recommendations = {
-        0: {  # Balanced Users
-            "cluster_name": "Balanced Users",
-            "strategy": "Varied and balanced content approach",
-            "recommended_content_types": ["tool_sheets", "practical_guides", "webinars"],
-            "engagement_approach": "maintain_steady_engagement",
-            "description": "Users with moderate and diversified platform usage",
-            "next_steps": "Content suggestions will be personalized once thematic clustering is implemented"
+        0: {  # Peu Engagés Primaire
+            "cluster_name": "Peu Engagés Primaire",
+            "strategy": "Réactivation douce avec contenu très accessible",
+            "recommended_content_types": [
+                "Infographies visuelles",
+                "Vidéos courtes",
+                "Fiches outils simples",
+                "Contenus maternelle/élémentaire spécialisés"
+            ],
+            "engagement_approach": "low_barrier_reengagement",
+            "priority_challenges": ["Réussite de tous les élèves", "Santé mentale"],
+            "communication_style": "Encourageant et non-intimidant",
+            "next_steps": "Contenu d'entrée de gamme pour recréer l'habitude de consultation"
         },
-        1: {  # Email Specialists
-            "cluster_name": "Email Specialists",
-            "strategy": "Gentle transition from email to platform content",
-            "recommended_content_types": ["tool-sheets", "infographics", "short-videos"],
-            "engagement_approach": "convert_to_content_consumption",
-            "description": "Highly active on emails but minimal platform content usage",
-            "next_steps": "Email-to-content bridge strategies will be refined with thematic data"
+
+        1: {  # Actifs Polyvalents
+            "cluster_name": "Actifs Polyvalents",
+            "strategy": "Maintenir l'engagement avec contenu varié et évolutif",
+            "recommended_content_types": [
+                "Guides pratiques multi-niveaux",
+                "Ateliers webinaires",
+                "Contenus collaboratifs",
+                "Parcours de formation courts"
+            ],
+            "engagement_approach": "diversified_continuous_engagement",
+            "priority_challenges": ["École inclusive", "Compétences psychosociales", "Réussite de tous les élèves"],
+            "communication_style": "Informatif et structuré",
+            "next_steps": "Contenu personnalisé selon leurs 3 topics de prédilection"
         },
+
         2: {  # Super Users
             "cluster_name": "Super Users",
-            "strategy": "Advanced content and latest innovations",
-            "recommended_content_types": ["research_content", "mooc", "join_expert_team"],
-            "engagement_approach": "satisfy_high_expertise_needs",
-            "description": "Highly engaged users consuming diverse content types intensively",
-            "next_steps": "Advanced recommendations will leverage thematic preferences analysis"
+            "strategy": "Contenu expert et avant-gardiste, opportunités de contribution",
+            "recommended_content_types": [
+                "Recherches pédagogiques récentes",
+                "Contenus expérimentaux",
+                "Formations expertes",
+                "Opportunités de mentorat/création",
+                "Beta-testing nouveaux outils"
+            ],
+            "engagement_approach": "expert_community_involvement",
+            "priority_challenges": ["Tous les 5 défis", "Innovation pédagogique"],
+            "communication_style": "Technique et approfondi",
+            "next_steps": "Proposer de rejoindre l'équipe des créateurs de contenu"
         },
-        3: {  # Inactive Users
-            "cluster_name": "Inactive Users",
-            "strategy": "Re-engagement with accessible entry-point content",
-            "recommended_content_types": ["quick_videos", "simple_checklists", "visual_infographics"],
-            "engagement_approach": "anti_churn_activation",
-            "description": "Low engagement across all platform features",
-            "next_steps": "Targeted re-engagement content will be optimized with thematic insights"
+
+        3: {  # Email-Heavy
+            "cluster_name": "Email-Heavy",
+            "strategy": "Transition progressive de l'email vers la plateforme",
+            "recommended_content_types": [
+                "Liens directs depuis emails vers contenus similaires",
+                "Fiches outils téléchargeables",
+                "Contenus courts et actionables",
+                "Formats familiers (PDF, infographies)"
+            ],
+            "engagement_approach": "email_to_platform_conversion",
+            "priority_challenges": ["Efficacité pédagogique", "Gestion de classe"],
+            "communication_style": "Pratique et immédiatement utilisable",
+            "next_steps": "Gamification douce de la transition vers la plateforme"
+        },
+
+        4: {  # Peu Engagés Secondaire
+            "cluster_name": "Peu Engagés Secondaire",
+            "strategy": "Réactivation avec contenu spécialisé secondaire",
+            "recommended_content_types": [
+                "Contenus spécifiques collège/lycée",
+                "Gestion de classe adolescents",
+                "Outils disciplinaires",
+                "Contenus courts et percutants"
+            ],
+            "engagement_approach": "secondary_specialized_reengagement",
+            "priority_challenges": ["Motivation des élèves", "Orientation", "Compétences psychosociales"],
+            "communication_style": "Pragmatique et orienté résultats",
+            "next_steps": "Contenu hyper-ciblé sur leurs défis spécifiques du secondaire"
         }
     }
 
-    return recommendations.get(cluster_id, {
-        "error": "Invalid cluster ID",
-        "available_clusters": [0, 1, 2, 3]
+    # Enrich with persona data
+    recommendation = recommendations[cluster_id]
+    recommendation.update({
+        "cluster_size": persona["taille"],
+        "main_teaching_level": persona["niveau_principal"],
+        "activity_profile": {
+            "activite_generale": persona["activite_generale"],
+            "engagement_email": persona["engagement_email"],
+            "usage_contenu": persona["usage_contenu"],
+            "diversite_thematique": persona["diversite_thematique"]
+        }
     })
+
+    return recommendation
