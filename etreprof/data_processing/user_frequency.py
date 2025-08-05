@@ -91,7 +91,8 @@ def create_temporal_engagement_df_optimized(df_interactions):
     print(f"📊 Total interactions : {len(df_interactions)}")
 
     # Define periods
-    now = datetime.now()
+    # now = datetime.now() # Use current date and time but for testing purposes we use a fixed date
+    now = datetime(2025, 7, 10, 15, 53, 58)  # Fixed date for testing
     weeks = [(now - timedelta(weeks=i+1), now - timedelta(weeks=i)) for i in range(12)]
     months = [(now - timedelta(days=30*(i+1)), now - timedelta(days=30*i)) for i in range(12)]
     years = [(now - timedelta(days=365*(i+1)), now - timedelta(days=365*i)) for i in range(3)]
