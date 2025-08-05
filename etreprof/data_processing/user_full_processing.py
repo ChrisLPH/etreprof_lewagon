@@ -5,8 +5,6 @@ from .user_contents import main_contents_usage
 import os
 from dotenv import load_dotenv
 
-
-
 def main_process_users(df_users, df_contents, df_interactions):
     """
     Main function to process user data, contents, and interactions.
@@ -29,8 +27,10 @@ def main_process_users(df_users, df_contents, df_interactions):
     # Clean user data
     df_users_cleaned = main_users_cleaning(df_users)
 
+
     # Process user frequency data
     df_users_enriched = main_frequency_users(df_interactions, df_users_cleaned)
+
 
     # Process user contents usage
     df_final = main_contents_usage(df_contents, df_interactions, df_users_enriched)

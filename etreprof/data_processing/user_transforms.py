@@ -1,11 +1,6 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import json
-from collections import Counter
-import os
-from dotenv import load_dotenv
 
 
 def drop_col(df, string):
@@ -16,12 +11,6 @@ def drop_col(df, string):
         df.drop(string, axis=1, inplace=True)
         return
 
-
-def clean_json_niveaux(df):
-    """
-    Cleans the 'niveaux' column in the DataFrame df.
-    Converts JSON strings to lists and handles missing values.
-    """
 
 niveaux_rares = [
     "Études supérieures", "Enseignement spécialisé", "Maternelle",
@@ -313,6 +302,7 @@ def update_anciennete(row):
     except:
         return anciennete
 
+
 def main_users_cleaning(df):
     """
     Cleans the user data from the given csv file.
@@ -321,6 +311,41 @@ def main_users_cleaning(df):
     # Drop unnecessary columns and filter data
     df = df[df.locale != "be"]
     df['pays'] = df['pays'].fillna('france')
+    df['pays'] = df['pays'].str.lower().str.strip()
+    variants_france = [
+            'france', 'f', 'fr', 'fra', 'fran', 'franc', 'francs', 'frnace',
+            'frrance', 'fance', 'farnce', 'frane', 'francr', 'frande', 'franxe',
+            'frannce', 'francec', 'francer', 'français', 'françe', 'francia',
+            'francce', 'franccccccce', 'franche', 'france0', 'frankreich',
+            "france  d'origine it", 'france (ile de la ré', 'france nouvelle-calé',
+            'france réunion', 'france île de la réu', 'france/ gb/canada/us',
+            'guadeloupe', 'guadeloupe (dom)', 'guadeloupe france',
+            'martinique', 'martiniqie', 'martinique (france)', 'martinique ( france)',
+            'réunion', 'reunion', 'runion', 'reunion france', 'la reunion', 'la réunion',
+            'ile de la reunion', 'ile de la réunion', 'ile de la réunion (f',
+            'île de la reunion',
+            'guyane', 'guyane française', 'guyane francaise', 'french guiana',
+            'mayotte', 'réside à mayotte',
+            'nouvelle calédonie', 'nouvelle-calédonie', 'nouvelle calédonie',
+            'nouvelle caledonie', 'nouvelle-caledonie', 'nouvelle camédonie',
+            'nouvelle- calédonie', 'caledonie',
+            'polynésie française', 'polynesie française', 'polynesie francaise',
+            'polynésie', 'french polynesia', 'tahiti', 'tahiti (polynésie fr',
+            'saint-martin', 'saint martin', 'saint-martin (partie française)',
+            'saint barthelemy', 'saint pierre and miq',
+            'maurice', 'ile maurice',
+            'france (la réunion)', 'france (mayotte )', 'bretagne-france',
+            'paris', 'nice', 'angers', 'strasbourg', 'bourges', 'tarbes',
+            'montpellier', 'nantes', 'toulouse', 'mulhouse', 'cayenne', 'mirepoix',
+            'eysines', 'aubervilliers', 'amiens', 'angouleme', 'vierzon',
+            'le cannet', 'oyonnax', 'romans', 'chaumont en vexin', 'sucy',
+            'amberieu en bugey', 'aigueperse', 'le creusot', 'mantrs la ville',
+            'montbéliard', 'st joseph', 'bretagne', '', '600'
+        ]
+
+    df.loc[df['pays'].isin(variants_france), 'pays'] = 'france'
+
+    df.loc[df['pays'].isin(['', '600']), 'pays'] = 'france'
     df = df[df.pays == 'france']
 
     col_to_drop = ['locale', 'public', 'name', 'prenom', 'pays', 'statut',
