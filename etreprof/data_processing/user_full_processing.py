@@ -5,7 +5,7 @@ from .user_contents import main_contents_usage
 import os
 from dotenv import load_dotenv
 
-def main_process_users(df_users, df_contents, df_interactions):
+def main_process_users(df_users, df_contents, df_content_valid, df_interactions):
     """
     Main function to process user data, contents, and interactions.
 
@@ -33,7 +33,7 @@ def main_process_users(df_users, df_contents, df_interactions):
 
 
     # Process user contents usage
-    df_final = main_contents_usage(df_contents, df_interactions, df_users_enriched)
+    df_final = main_contents_usage(df_contents, df_interactions, df_users_enriched, df_content_valid)
 
     return df_final
 
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     df_users = pd.read_csv("raw_data/users.csv", low_memory=False)
     df_contents = pd.read_csv("raw_data/contents_v3.csv", low_memory=False)
     df_interactions = pd.read_csv("raw_data/interaction_events.csv", low_memory=False)
+    df_content_valid = pd.read_csv("raw_data/content_with_topics.csv", low_memory=False)
 
-    df_final = main_process_users(df_users, df_contents, df_interactions)
+    df_final = main_process_users(df_users, df_contents, df_content_valid, df_interactions)
     df_final.to_csv("data/users_final_dataset.csv", index=False)

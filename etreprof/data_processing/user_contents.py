@@ -1,11 +1,55 @@
-import csv
 import pandas as pd
-import numpy as np
-import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from tqdm import tqdm
 
-def main_contents_usage(df_contents, df_interactions, df_users):
+def create_user_topic_enrichment(df_interactions, df_users, df_content_valid):
+    """
+    Enrich users database with topics
+    3 args :
+        - df_interactions
+        - df_users
+        - df_content_valid : the dataframe with the topics
+    """
+    # Update column types
+    df_interactions['created_at'] = pd.to_datetime(df_interactions['created_at'])
+    df_interactions['content_id'] = df_interactions['content_id'].astype(str)
+    df_content_valid['id'] = df_content_valid['id'].astype(str)
+
+    # We only take the actions of the 3 last years
+    cutoff_date = datetime.now() - timedelta(days=365*3)
+    df_interactions = df_interactions[df_interactions['created_at'] >= cutoff_date]
+
+
+    # Join interaction_events + df_content_valid
+    df_interactions_filtered = df_interactions.merge(df_content_valid[['id', 'reduced topics']],
+            left_on='content_id', right_on='id', how='inner')
+
+    # Drop duplicates of (user_id, content_id) tuple
+    df_interactions_unique = df_interactions_filtered.drop_duplicates(subset=['user_id', 'content_id'])
+
+    # Count by topic
+    df_user_topic_counts = df_interactions_unique.groupby(['user_id', 'reduced topics']).size().reset_index(name='count')
+
+    # need to pivot the results
+    df_topic_matrix = df_user_topic_counts.pivot(
+        index='user_id',
+        columns='reduced topics',
+        values='count'
+    ).fillna(0)
+
+    # Add count of different topics and rename
+    df_topic_matrix['topic_count'] = (df_topic_matrix > 0).sum(axis=1)
+    df_topic_matrix.columns = [f'topic_{col}' if col != 'topic_count'
+                           else col for col in df_topic_matrix.columns]
+
+    # Merge with users
+    df_users_enriched = df_users.merge(
+        df_topic_matrix, left_on='id', right_index=True, how='left'
+    ).fillna(0)
+
+    return df_users_enriched
+
+def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid):
     """
     Main function to process user contents usage data from interactions and user CSV files.
 
@@ -17,6 +61,8 @@ def main_contents_usage(df_contents, df_interactions, df_users):
         DataFrame containing user interactions.
     df_users : pandas.DataFrame
         DataFrame containing user data.
+    df_content_valid : pandas.DataFrame
+        DataFrame containing valid content data with topics.
 
     Returns
     -------
@@ -147,5 +193,8 @@ def main_contents_usage(df_contents, df_interactions, df_users):
                         on='id',
                         how='right'
                     )
+
+    # Fill with topics enrichment
+    df_complete = create_user_topic_enrichment(df_interactions, df_complete, df_content_valid)
 
     return df_complete
