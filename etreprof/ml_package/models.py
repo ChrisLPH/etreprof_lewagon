@@ -6,7 +6,9 @@ from bertopic import BERTopic
 from sentence_transformers import SentenceTransformer
 import json
 import numpy as np
-from .recommender import generate_recommendations_for_cluster, get_user_recommendations
+# from .recommender import generate_recommendations_for_cluster, get_user_recommendations
+from .recommender import generate_simple_recommendations
+
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -78,12 +80,6 @@ def load_clustering_models():
     profiles_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/cluster_profiles.csv')
     personas_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/cluster_personas_lisibles.json')
 
-
-    # kmeans = pickle.load(open(kmeans_path, 'rb'))
-    # scaler = pickle.load(open(scaler_path, 'rb'))
-    # metadata = json.load(metadata_path, 'r')
-    # profiles = pd.read_csv(profiles_path, index_col=0)
-    # personas = json.load(personas_path, 'r', encoding='utf-8')
     # Load models
     with open(kmeans_path, 'rb') as f:
         kmeans = pickle.load(f)
@@ -170,7 +166,7 @@ def get_user_profile(user_id: int):
 
     cluster_info = get_cluster_info()[cluster_id]
 
-    recommendations = get_recommendations_for_cluster(cluster_id)
+    recommendations = generate_simple_recommendations(cluster_id)
 
     niveaux = []
     if user_row.get('maternelle', 0) == 1:
@@ -310,43 +306,43 @@ def get_user_profile(user_id: int):
 
 #     return recommendation
 
-def get_recommendations_for_cluster(cluster_id: int):
-    """
-    Get real recommendation strategy for each of the 5 clusters
-    Now using the actual recommendation engine
-    """
+# def get_recommendations_for_cluster(cluster_id: int):
+#     """
+#     Get real recommendation strategy for each of the 5 clusters
+#     Now using the actual recommendation engine
+#     """
 
-    if cluster_id not in range(5):
-        return {
-            "error": "Invalid cluster ID",
-            "available_clusters": [0, 1, 2, 3, 4]
-        }
+#     if cluster_id not in range(5):
+#         return {
+#             "error": "Invalid cluster ID",
+#             "available_clusters": [0, 1, 2, 3, 4]
+#         }
 
-    recommendations = generate_recommendations_for_cluster(cluster_id, num_recommendations=4)
+#     recommendations = generate_recommendations_for_cluster(cluster_id, num_recommendations=4)
 
-    # Load personas for business context
-    _, _, _, _, personas = load_clustering_models()
-    persona = personas[str(cluster_id)]
+#     # Load personas for business context
+#     _, _, _, _, personas = load_clustering_models()
+#     persona = personas[str(cluster_id)]
 
-    # Format for API response
-    formatted_response = {
-        "cluster_id": cluster_id,
-        "cluster_name": persona["nom"],
-        "cluster_description": {
-            "taille": persona["taille"],
-            "niveau_principal": persona["niveau_principal"],
-            "activite_generale": persona["activite_generale"],
-            "engagement_email": persona["engagement_email"],
-            "usage_contenu": persona["usage_contenu"],
-            "diversite_thematique": persona["diversite_thematique"]
-        },
-        "recommendation_strategy": {
-            "top_topics": recommendations.get("reasoning", {}).get("top_topics", []),
-            "selection_strategy": recommendations.get("reasoning", {}).get("selection_strategy", "")
-        },
-        "recommended_contents": recommendations.get("recommendations", []),
-        "total_recommendations": len(recommendations.get("recommendations", [])),
-        "system_status": "Production - Real recommendation engine with topic-based personalization"
-    }
+#     # Format for API response
+#     formatted_response = {
+#         "cluster_id": cluster_id,
+#         "cluster_name": persona["nom"],
+#         "cluster_description": {
+#             "taille": persona["taille"],
+#             "niveau_principal": persona["niveau_principal"],
+#             "activite_generale": persona["activite_generale"],
+#             "engagement_email": persona["engagement_email"],
+#             "usage_contenu": persona["usage_contenu"],
+#             "diversite_thematique": persona["diversite_thematique"]
+#         },
+#         "recommendation_strategy": {
+#             "top_topics": recommendations.get("reasoning", {}).get("top_topics", []),
+#             "selection_strategy": recommendations.get("reasoning", {}).get("selection_strategy", "")
+#         },
+#         "recommended_contents": recommendations.get("recommendations", []),
+#         "total_recommendations": len(recommendations.get("recommendations", [])),
+#         "system_status": "Production - Real recommendation engine with topic-based personalization"
+#     }
 
-    return formatted_response
+#     return formatted_response

@@ -4,9 +4,16 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY etreprof etreprof
-COPY data/cluster_profiles.csv data/cluster_profiles.csv
-COPY data/user_cluster_assignments.csv data/user_cluster_assignments.csv
 COPY setup.py setup.py
+
+RUN mkdir -p data
+
+COPY data/cluster_profiles.csv data/
+COPY data/cluster_personas.json data/
+COPY data/cluster_personas_lisibles.json data/
+COPY data/user_cluster_assignments.csv data/
+COPY data/users_final_with_clusters.csv data/
+COPY data/content_with_topics.csv data/
 
 RUN pip install -e .
 
