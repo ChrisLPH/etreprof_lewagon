@@ -5,36 +5,23 @@ from typing import Dict
 from bertopic import BERTopic
 from sentence_transformers import SentenceTransformer
 import json
-import numpy as np
-# from .recommender import generate_recommendations_for_cluster, get_user_recommendations
 from .recommender import generate_simple_recommendations
-
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Content classification function
-# Old version commented out for reference - Mockup before real models were implemented
-# def classify_content(content: str) -> Dict:
-#     theme_path = os.path.join(ROOT_PATH, 'pickles/theme_model.pkl')
-#     with open(theme_path, 'rb') as f:
-#         theme_model = pickle.load(f)
-
-#     defi_path = os.path.join(ROOT_PATH, 'pickles/defi_model.pkl')
-#     with open(defi_path, 'rb') as f:
-#         defi_model = pickle.load(f)
-
-#     theme_pred = theme_model.predict([content])[0]
-#     defi_pred = defi_model.predict([content])[0]
-
-#     return {
-#         "theme": theme_pred,
-#         "defi": defi_pred
-#     }
-
 def classify_content(content: str) -> Dict:
     """
     Classify content using BERTopic model trained by Guillaume
     Returns top 3 topics with confidence scores.
+    Parameters
+    ----------
+    content : str
+        The content to classify.
+    Returns
+    -------
+    Dict
+        A dictionary with the main topic ID, label, and confidence score.
     """
     bertopic_path = os.path.join(ROOT_PATH, 'pickles/bertopic')
     topics_json_path = os.path.join(bertopic_path, 'topics.json')
@@ -46,13 +33,11 @@ def classify_content(content: str) -> Dict:
     topic_labels = topics_data['topic_labels']
 
     # Load the model
-    embedding_model = SentenceTransformer('intfloat/multilingual-e5-large-instruct')
+    embedding_model = SentenceTransformer('intfloat/multilingual-e5-large-instruct', device='cpu')
     topic_model = BERTopic.load(bertopic_path, embedding_model=embedding_model)
 
     # Prediction
     topics, scores = topic_model.transform([content])
-    topic_id = topics[0]
-    confidence = scores[0] if len(scores) > 0 else 0.0
 
     # Topic principal (le seul assigné par BERTopic)
     main_topic_id = topics[0]
@@ -62,7 +47,6 @@ def classify_content(content: str) -> Dict:
     main_topic_label = topic_labels.get(str(main_topic_id), f"Topic {main_topic_id}")
     if "_" in main_topic_label:
         main_topic_label = main_topic_label.split("_", 1)[1]
-
 
     return {
         "topic_principal": {
@@ -74,6 +58,13 @@ def classify_content(content: str) -> Dict:
 
 # User clustering functions
 def load_clustering_models():
+    """
+    Load clustering models and metadata.
+    Returns
+    -------
+    Tuple
+        A tuple containing the KMeans model, scaler, metadata, cluster profiles, and personas.
+    """
     kmeans_path = os.path.join(ROOT_PATH, 'pickles/kmeans_model.pkl')
     scaler_path = os.path.join(ROOT_PATH, 'pickles/scaler_model.pkl')
     metadata_path = os.path.join(ROOT_PATH, 'pickles/metadata.json')
@@ -101,8 +92,14 @@ def load_clustering_models():
     return kmeans, scaler, metadata, profiles, personas
 
 def get_cluster_info():
-    """Get information about all 5 clusters with real data"""
-    _, _, metadata, profiles, personas = load_clustering_models()
+    """
+    Get information about all 5 clusters with real data
+    Returns
+    -------
+    Dict
+        A dictionary containing cluster information including name, count, percentage, description, and profile.
+    """
+    _, _, _, profiles, personas = load_clustering_models()
 
     # Combine statistical profiles with business personas
     cluster_info = {}
@@ -128,6 +125,16 @@ def get_cluster_info():
 
 # Update clustering of users
 def predict_user_clusters(df_users):
+    """
+    Predict user clusters based on features used in clustering.
+    Parameters
+    ----------
+    df_users : pandas.DataFrame
+        DataFrame containing user features.
+    Returns
+    -------
+    numpy.ndarray
+        Array of predicted cluster labels for each user."""
     kmeans, scaler, metadata, _, _ = load_clustering_models()
 
     # Get the features used for clustering from metadata
@@ -152,6 +159,7 @@ def predict_user_clusters(df_users):
 
     return clusters
 
+# Get user profile by ID
 def get_user_profile(user_id: int):
     assignments_path = os.path.join(os.path.dirname(os.path.dirname(ROOT_PATH)), 'data/user_cluster_assignments.csv')
     df_assignments = pd.read_csv(assignments_path)
@@ -195,154 +203,3 @@ def get_user_profile(user_id: int):
         },
         "recommendations": recommendations
     }
-
-# Recommendations based on clusters
-# def get_recommendations_for_cluster(cluster_id: int):
-#     """
-#     Get recommendation strategy for each of the 5 real clusters
-#     Based on the business personas and behavioral patterns identified
-#     """
-
-#     if cluster_id not in range(5):
-#         return {
-#             "error": "Invalid cluster ID",
-#             "available_clusters": [0, 1, 2, 3, 4]
-#         }
-
-#     # Load personas for detailed recommendations
-#     _, _, _, _, personas = load_clustering_models()
-#     persona = personas[str(cluster_id)]
-
-#     recommendations = {
-#         0: {  # Peu Engagés Primaire
-#             "cluster_name": "Peu Engagés Primaire",
-#             "strategy": "Réactivation douce avec contenu très accessible",
-#             "recommended_content_types": [
-#                 "Infographies visuelles",
-#                 "Vidéos courtes",
-#                 "Fiches outils simples",
-#                 "Contenus maternelle/élémentaire spécialisés"
-#             ],
-#             "engagement_approach": "low_barrier_reengagement",
-#             "priority_challenges": ["Réussite de tous les élèves", "Santé mentale"],
-#             "communication_style": "Encourageant et non-intimidant",
-#             "next_steps": "Contenu d'entrée de gamme pour recréer l'habitude de consultation"
-#         },
-
-#         1: {  # Actifs Polyvalents
-#             "cluster_name": "Actifs Polyvalents",
-#             "strategy": "Maintenir l'engagement avec contenu varié et évolutif",
-#             "recommended_content_types": [
-#                 "Guides pratiques multi-niveaux",
-#                 "Ateliers webinaires",
-#                 "Contenus collaboratifs",
-#                 "Parcours de formation courts"
-#             ],
-#             "engagement_approach": "diversified_continuous_engagement",
-#             "priority_challenges": ["École inclusive", "Compétences psychosociales", "Réussite de tous les élèves"],
-#             "communication_style": "Informatif et structuré",
-#             "next_steps": "Contenu personnalisé selon leurs 3 topics de prédilection"
-#         },
-
-#         2: {  # Super Users
-#             "cluster_name": "Super Users",
-#             "strategy": "Contenu expert et avant-gardiste, opportunités de contribution",
-#             "recommended_content_types": [
-#                 "Recherches pédagogiques récentes",
-#                 "Contenus expérimentaux",
-#                 "Formations expertes",
-#                 "Opportunités de mentorat/création",
-#                 "Beta-testing nouveaux outils"
-#             ],
-#             "engagement_approach": "expert_community_involvement",
-#             "priority_challenges": ["Tous les 5 défis", "Innovation pédagogique"],
-#             "communication_style": "Technique et approfondi",
-#             "next_steps": "Proposer de rejoindre l'équipe des créateurs de contenu"
-#         },
-
-#         3: {  # Email-Heavy
-#             "cluster_name": "Email-Heavy",
-#             "strategy": "Transition progressive de l'email vers la plateforme",
-#             "recommended_content_types": [
-#                 "Liens directs depuis emails vers contenus similaires",
-#                 "Fiches outils téléchargeables",
-#                 "Contenus courts et actionables",
-#                 "Formats familiers (PDF, infographies)"
-#             ],
-#             "engagement_approach": "email_to_platform_conversion",
-#             "priority_challenges": ["Efficacité pédagogique", "Gestion de classe"],
-#             "communication_style": "Pratique et immédiatement utilisable",
-#             "next_steps": "Gamification douce de la transition vers la plateforme"
-#         },
-
-#         4: {  # Peu Engagés Secondaire
-#             "cluster_name": "Peu Engagés Secondaire",
-#             "strategy": "Réactivation avec contenu spécialisé secondaire",
-#             "recommended_content_types": [
-#                 "Contenus spécifiques collège/lycée",
-#                 "Gestion de classe adolescents",
-#                 "Outils disciplinaires",
-#                 "Contenus courts et percutants"
-#             ],
-#             "engagement_approach": "secondary_specialized_reengagement",
-#             "priority_challenges": ["Motivation des élèves", "Orientation", "Compétences psychosociales"],
-#             "communication_style": "Pragmatique et orienté résultats",
-#             "next_steps": "Contenu hyper-ciblé sur leurs défis spécifiques du secondaire"
-#         }
-#     }
-
-#     # Enrich with persona data
-#     recommendation = recommendations[cluster_id]
-#     recommendation.update({
-#         "cluster_size": persona["taille"],
-#         "main_teaching_level": persona["niveau_principal"],
-#         "activity_profile": {
-#             "activite_generale": persona["activite_generale"],
-#             "engagement_email": persona["engagement_email"],
-#             "usage_contenu": persona["usage_contenu"],
-#             "diversite_thematique": persona["diversite_thematique"]
-#         }
-#     })
-
-#     return recommendation
-
-# def get_recommendations_for_cluster(cluster_id: int):
-#     """
-#     Get real recommendation strategy for each of the 5 clusters
-#     Now using the actual recommendation engine
-#     """
-
-#     if cluster_id not in range(5):
-#         return {
-#             "error": "Invalid cluster ID",
-#             "available_clusters": [0, 1, 2, 3, 4]
-#         }
-
-#     recommendations = generate_recommendations_for_cluster(cluster_id, num_recommendations=4)
-
-#     # Load personas for business context
-#     _, _, _, _, personas = load_clustering_models()
-#     persona = personas[str(cluster_id)]
-
-#     # Format for API response
-#     formatted_response = {
-#         "cluster_id": cluster_id,
-#         "cluster_name": persona["nom"],
-#         "cluster_description": {
-#             "taille": persona["taille"],
-#             "niveau_principal": persona["niveau_principal"],
-#             "activite_generale": persona["activite_generale"],
-#             "engagement_email": persona["engagement_email"],
-#             "usage_contenu": persona["usage_contenu"],
-#             "diversite_thematique": persona["diversite_thematique"]
-#         },
-#         "recommendation_strategy": {
-#             "top_topics": recommendations.get("reasoning", {}).get("top_topics", []),
-#             "selection_strategy": recommendations.get("reasoning", {}).get("selection_strategy", "")
-#         },
-#         "recommended_contents": recommendations.get("recommendations", []),
-#         "total_recommendations": len(recommendations.get("recommendations", [])),
-#         "system_status": "Production - Real recommendation engine with topic-based personalization"
-#     }
-
-#     return formatted_response

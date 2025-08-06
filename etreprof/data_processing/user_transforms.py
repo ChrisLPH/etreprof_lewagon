@@ -151,94 +151,35 @@ def extract_departement(code_postal):
     return cp[:2]
 
 dept_to_academie = {
-    # Clermont-Ferrand
     '03': 'Clermont-Ferrand', '15': 'Clermont-Ferrand', '43': 'Clermont-Ferrand', '63': 'Clermont-Ferrand',
-
-    # Grenoble
     '07': 'Grenoble', '26': 'Grenoble', '38': 'Grenoble', '73': 'Grenoble', '74': 'Grenoble',
-
-    # Lyon
     '01': 'Lyon', '42': 'Lyon', '69': 'Lyon', '69D': 'Lyon', '69M': 'Lyon',
-
-    # Besançon
     '25': 'Besançon', '39': 'Besançon', '70': 'Besançon', '90': 'Besançon',
-
-    # Dijon
     '21': 'Dijon', '58': 'Dijon', '71': 'Dijon', '89': 'Dijon',
-
-    # Rennes
     '22': 'Rennes', '29': 'Rennes', '35': 'Rennes', '56': 'Rennes',
-
-    # Orléans-Tours
     '18': 'Orléans-Tours', '28': 'Orléans-Tours', '36': 'Orléans-Tours', '37': 'Orléans-Tours', '41': 'Orléans-Tours', '45': 'Orléans-Tours',
-
-    # Corse
     '2A': 'Corse', '2B': 'Corse',
-
-    # Nancy-Metz
     '54': 'Nancy-Metz', '55': 'Nancy-Metz', '57': 'Nancy-Metz', '88': 'Nancy-Metz',
-
-    # Reims
     '08': 'Reims', '10': 'Reims', '51': 'Reims', '52': 'Reims',
-
-    # Strasbourg
     '67': 'Strasbourg', '68': 'Strasbourg',
-
-    # Guadeloupe
     '971': 'Guadeloupe', '977': 'Guadeloupe', '978': 'Guadeloupe',
-
-    # Guyane
     '973': 'Guyane',
-
-    # Amiens
     '02': 'Amiens', '60': 'Amiens', '80': 'Amiens',
-
-    # Lille
     '59': 'Lille', '62': 'Lille',
-
-    # Créteil
     '77': 'Créteil', '93': 'Créteil', '94': 'Créteil',
-
-    # Paris
     '75': 'Paris',
-
-    # Versailles
     '78': 'Versailles', '91': 'Versailles', '92': 'Versailles', '95': 'Versailles',
-
-    # Martinique
     '972': 'Martinique',
-
-    # Normandie
     '14': 'Normandie', '27': 'Normandie', '50': 'Normandie', '61': 'Normandie', '76': 'Normandie', '975': 'Normandie',
-
-    # Bordeaux
     '24': 'Bordeaux', '33': 'Bordeaux', '40': 'Bordeaux', '47': 'Bordeaux', '64': 'Bordeaux',
-
-    # Limoges
     '19': 'Limoges', '23': 'Limoges', '87': 'Limoges',
-
-    # Poitiers
     '16': 'Poitiers', '17': 'Poitiers', '79': 'Poitiers', '86': 'Poitiers',
-
-    # Montpellier
     '11': 'Montpellier', '30': 'Montpellier', '34': 'Montpellier', '48': 'Montpellier', '66': 'Montpellier',
-
-    # Toulouse
     '09': 'Toulouse', '12': 'Toulouse', '31': 'Toulouse', '32': 'Toulouse', '46': 'Toulouse', '65': 'Toulouse', '81': 'Toulouse', '82': 'Toulouse',
-
-    # Nantes
     '44': 'Nantes', '49': 'Nantes', '53': 'Nantes', '72': 'Nantes', '85': 'Nantes',
-
-    # Aix-Marseille
     '04': 'Aix-Marseille', '05': 'Aix-Marseille', '13': 'Aix-Marseille', '84': 'Aix-Marseille',
-
-    # Nice
     '06': 'Nice', '83': 'Nice',
-
-    # La Réunion
     '974': 'La Réunion',
-
-    # Mayotte
     '976': 'Mayotte'
 }
 

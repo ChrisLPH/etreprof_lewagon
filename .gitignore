@@ -9,3 +9,4 @@ __pycache__/
 *.pyd
 .Python
 Test_bug.ipynb
+etreprof_ml.egg-info/

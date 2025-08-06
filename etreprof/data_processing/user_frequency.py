@@ -1,10 +1,7 @@
 import pandas as pd
-import numpy as np
 from datetime import datetime, timedelta
 from tqdm import tqdm
 import time
-
-
 
 def create_temporal_engagement_df_optimized(df_interactions):
     """

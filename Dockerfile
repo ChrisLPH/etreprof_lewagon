@@ -14,6 +14,7 @@ COPY data/cluster_personas_lisibles.json data/
 COPY data/user_cluster_assignments.csv data/
 COPY data/users_final_with_clusters.csv data/
 COPY data/content_with_topics.csv data/
+COPY data/content_recommendations_mapping.csv data/
 
 RUN pip install -e .
 

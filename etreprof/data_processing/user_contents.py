@@ -19,7 +19,6 @@ def create_user_topic_enrichment(df_interactions, df_users, df_content_valid):
     cutoff_date = datetime.now() - timedelta(days=365*3)
     df_interactions = df_interactions[df_interactions['created_at'] >= cutoff_date]
 
-
     # Join interaction_events + df_content_valid
     df_interactions_filtered = df_interactions.merge(df_content_valid[['id', 'reduced topics']],
             left_on='content_id', right_on='id', how='inner')
@@ -83,12 +82,12 @@ def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid
         ((df_interactions_filtered.content_type == 'fiche-outils') & (df_interactions_filtered.type == "download"))
     ]
 
-    # 1. CONTENT TYPE FEATURES
+    # CONTENT TYPE FEATURES
     # Count interactions by user and content type
     content_type_features = df_interactions_filtered.groupby(['user_id', 'content_type']).size().unstack(fill_value=0)
     content_type_features.columns = [f'nb_{col.replace("-", "_")}' for col in content_type_features.columns]
 
-    # 2. PRIORITY CHALLENGE FEATURES
+    # PRIORITY CHALLENGE FEATURES
     # Merge with df_contents_lite to get priority challenges and themes
     # Fix type mismatch: convert content_id to int to match df_contents_lite id column
     df_interactions_filtered['content_id'] = pd.to_numeric(df_interactions_filtered['content_id'], errors='coerce')
@@ -121,7 +120,7 @@ def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid
 
     priority_features = count_priority_challenge_interactions(df_interactions_with_content)
 
-    # 3. COMBINE INTO FINAL MATRIX
+    # COMBINE INTO FINAL MATRIX
     # Start with unique user_ids
     df_user_features = pd.DataFrame({'user_id': df_interactions_filtered['user_id'].unique()})
 
@@ -139,7 +138,7 @@ def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid
         how='left'
     ).fillna(0)
 
-    # 4. THEME FEATURES
+    # THEME FEATURES
     # Filter interactions that have a defined master_theme (not None/NaN)
     theme_interactions = df_interactions_with_content.dropna(subset=['master_theme'])
 
@@ -155,7 +154,6 @@ def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid
             how='left'
         ).fillna(0)
 
-    # 5. BONUS FEATURES
     # Total interactions per user
     df_user_features['total_interactions'] = df_interactions_filtered.groupby('user_id').size().values
 
@@ -166,13 +164,13 @@ def main_contents_usage(df_contents, df_interactions, df_users, df_content_valid
     numeric_columns = df_user_features.select_dtypes(include=['float64']).columns
     df_user_features[numeric_columns] = df_user_features[numeric_columns].astype(int)
 
-    # Créer DataFrame avec user_id uniques
+    # Create DataFrame with user_id uniques
     df_engagement = pd.DataFrame({'user_id': df_interactions['user_id'].unique()})
 
-    # Compter chaque type d'interaction par user
+    # Count each type of interaction by user
     engagement_counts = df_interactions.groupby(['user_id', 'type']).size().unstack(fill_value=0)
 
-    # Ajouter seulement les colonnes qui nous intéressent (avec 0 si elles n'existent pas)
+    # Add only the columns we are interested in (with 0 if they do not exist)
     df_engagement['nb_vote'] = engagement_counts.get('contenu_vote', 0).values if 'contenu_vote' in engagement_counts.columns else 0
     df_engagement['nb_comments'] = engagement_counts.get('comment_posted', 0).values if 'comment_posted' in engagement_counts.columns else 0
     df_engagement['nb_opened_mail'] = engagement_counts.get('opened_mail', 0).values if 'opened_mail' in engagement_counts.columns else 0
